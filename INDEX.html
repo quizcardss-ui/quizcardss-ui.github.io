@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Quiz Cards</title>
+
+  <!-- Roboto -->
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="estilos.css">
+</head>
+<body>
+  <div class="app-frame" id="app-frame">
+    <!-- Inicio -->
+    <section class="pantalla" id="pant-inicio">
+      <div class="card">
+        <img src="img/logo.png" alt="Quiz Cards" class="logo-img">
+        <button class="btn primary" id="btn-iniciar">Iniciar sesión</button>
+        <button class="btn primary" id="btn-registrar">Registrarte</button>
+
+        <div class="info-box">
+          Se recomienda utilizar correo electrónico institucional para acceder al material
+        </div>
+      </div>
+    </section>
+
+   <!-- Login -->
+<section class="pantalla" id="pant-login">
+  <form id="form-login" class="card">
+
+    <h2 class="title">Iniciar sesión</h2>
+
+    <label class="field-label">Dirección de correo electrónico</label>
+    <input class="field" id="login-email" type="email"
+      placeholder="12345678@utfv.edu.mx"
+      pattern=".+@utfv\.edu\.mx$"
+      required>
+
+    <label class="field-label">Contraseña</label>
+    <div class="password-row">
+      <input class="field" id="login-password" type="password" placeholder="••••••" required>
+      <button class="icon-btn" id="toggle-login-pass" type="button">👁️</button>
+    </div>
+
+    <div class="row options">
+      <label class="checkbox"><input type="checkbox" id="login-rem"> Recuérdame</label>
+      <a href="#" id="link-olvidaste">¿Olvidaste la contraseña?</a>
+    </div>
+
+    <button class="btn primary" type="submit">Aceptar</button>
+    <button class="btn primary" id="login-cancelar" type="button">Volver</button>
+
+  </form>
+</section>
+
+
+    <!-- Registro -->
+<section class="pantalla" id="pant-register">
+  <form id="form-register" class="card scrollable">
+
+    <h2 class="title">Registrarme</h2>
+
+    <label class="field-label">Nombre de Usuario</label>
+    <input class="field" id="reg-usuario" type="text" placeholder="Usuario" required>
+
+    <label class="field-label">E-mail</label>
+    <input class="field" id="reg-email" type="email"
+      placeholder="ejemplo@utfv.edu.mx"
+      pattern=".+@utfv\.edu\.mx$"
+      required>
+
+    <label class="field-label">Contraseña</label>
+    <div class="password-row">
+      <input class="field" id="reg-pass" type="password" placeholder="••••••" required>
+      <button class="icon-btn" id="toggle-reg-pass" type="button">👁️</button>
+    </div>
+
+    <label class="field-label">Confirmar Contraseña</label>
+    <input class="field" id="reg-pass2" type="password" placeholder="••••••" required>
+
+    <button class="btn primary" type="submit">Aceptar</button>
+    <button class="btn primary" type="button" id="reg-cancelar">Cancelar</button>
+    
+  </form>
+</section>
+
+    <!-- Recuperación - Paso 1 -->
+    <section class="pantalla" id="pant-recov-1">
+      <div class="card">
+        <h2 class="title">¿Olvidaste la contraseña?</h2>
+        <label class="field-label">Ingrese el correo de recuperación</label>
+        <input class="field" id="recov-email" type="email" placeholder="87654321@gmail.com">
+
+        <label class="field-label">Ingrese el código</label>
+        <input class="field" id="recov-code" type="text" placeholder="123-456">
+
+        <button class="btn primary" id="recov-confirm">Confirmar código</button>
+        <button class="btn primary" id="recov-cancel">Volver</button>
+      </div>
+    </section>
+
+    <!-- Recuperación - Paso 2 -->
+    <section class="pantalla" id="pant-recov-2">
+      <div class="card">
+        <h2 class="title">¿Olvidaste la contraseña?</h2>
+        <label class="field-label">Nueva Contraseña</label>
+        <input class="field" id="recov-new" type="password" placeholder="••••••">
+
+        <label class="field-label">Confirmar Contraseña</label>
+        <input class="field" id="recov-new2" type="password" placeholder="••••••">
+
+        <button class="btn primary" id="recov-change">Cambiar contraseña</button>
+        <button class="btn primary" id="recov-back">Volver</button>
+      </div>
+    </section>
+
+    <!-- Cuatrimestres -->
+    <section class="pantalla" id="pant-cuatri">
+      <div class="card">
+        <h2 class="title">Escoge tu nivel de TSU</h2>
+        <div class="grid-2x3">
+          <button class="btn primary cuatri" data-c="1">Primer Cuatrimestre</button>
+          <button class="btn primary cuatri" data-c="2">Segundo Cuatrimestre</button>
+          <button class="btn primary cuatri" data-c="3">Tercer Cuatrimestre</button>
+          <button class="btn primary cuatri" data-c="4">Cuarto Cuatrimestre</button>
+          <button class="btn primary cuatri" data-c="5">Quinto Cuatrimestre</button>
+        </div>
+        <button class="btn primary" id="cuatri-back">Volver</button>
+      </div>
+    </section>
+
+    <!-- Materias -->
+    <section class="pantalla" id="pant-materias">
+      <div class="card">
+        <h2 class="title" id="materias-titulo">Materias</h2>
+        <div id="materias-list" class="grid-2x3"></div>
+        <button class="btn primary" id="materias-back">Volver</button>
+      </div>
+    </section>
+
+    <!-- Guía o Juego -->
+    <section class="pantalla" id="pant-guiajuego">
+      <div class="card">
+        <h2 class="title" id="titulo-materia">Materia</h2>
+        <div class="grid-2x1">
+          <button class="btn primary" id="btn-ver-guia">Guía de Estudio</button>
+          <button class="btn primary" id="btn-iniciar-juego">Iniciar Juego</button>
+        </div>
+        <button class="btn primary" id="guiajuego-back">Volver</button>
+      </div>
+    </section>
+
+    <!-- Pantalla Guía -->
+    <section class="pantalla" id="pant-guia">
+      <div class="card scrollable">
+        <h2 class="title" id="guia-title">Guía</h2>
+        <div id="guia-content" class="guia-content"></div>
+        <button class="btn primary" id="guia-back">Volver</button>
+      </div>
+    </section>
+
+    <!-- Pantalla Juego -->
+    <section class="pantalla" id="pant-juego">
+      <div class="card">
+        <h2 class="title" id="juego-title">Juego</h2>
+        <div id="juego-area" class="juego-area"></div>
+
+        <div class="row-between">
+          <button class="btn primary" id="volver-materias">Volver a materias</button>
+
+          <div style="flex:1"></div>
+          <button class="btn primary" id="juego-prev" style="display:none">Anterior</button>
+          <button class="btn primary" id="juego-next" style="display:none">Siguiente</button>
+        </div>
+      </div>
+    </section>
+
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>

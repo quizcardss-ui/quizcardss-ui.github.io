@@ -4572,6 +4572,13 @@ function getMateria(cuatri, index){
 }
 
 /* -------------------------
+  Juego: estado de respuestas del usuario
+-------------------------*/
+
+let userAnswers = {};      // guarda: userAnswers[indicePregunta] = indiceSeleccionado
+let userShuffles = {};     // guarda el orden mezclado por pregunta
+
+/* -------------------------
   Juego: mezcla preguntas y opciones
 -------------------------*/
 function startGame(cuatri, materiaIndex){
@@ -4581,40 +4588,56 @@ function startGame(cuatri, materiaIndex){
     return;
   }
 
-  // preparar preguntas: clon + mezcla del orden de preguntas
   const preguntasClon = JSON.parse(JSON.stringify(materia.preguntas));
-  shuffleArray(preguntasClon); // mezcla el orden de las preguntas
+  shuffleArray(preguntasClon);
 
   gameState = {
-    cuatri, materiaIndex,
+    cuatri,
+    materiaIndex,
     preguntas: preguntasClon,
     indice: 0,
     score: 0,
-    // cada elemento tendrá .opcionesShuffled y .correctIndexShuffled calculado por renderQuestion
+    answers: Array(preguntasClon.length).fill(null),
+    opcionesMezcladas: Array(preguntasClon.length).fill(null)
   };
 
   show(screens.juego);
   renderQuestion();
 }
 
-function renderQuestion(){
+function renderQuestion() {
   const area = document.getElementById('juego-area');
   area.innerHTML = '';
-  if(!gameState) return;
+  if (!gameState) return;
 
-  const pObj = gameState.preguntas[gameState.indice];
-  // crear copia de opciones con indice original
-  let opciones = pObj.opciones.map((t,i) => ({ texto: t, originalIndex: i }));
-  // mezcla opciones
-  shuffleArray(opciones);
+  const pIndex = gameState.indice;
+  const pObj = gameState.preguntas[pIndex];
 
-  // calcular nueva posición de la correcta
-  const nuevaCorrecta = opciones.findIndex(o => o.originalIndex === pObj.correcta);
+  // Si esta pregunta ya tiene opciones guardadas, las usamos
+  let opciones;
+  if (pObj.opcionesShuffled) {
+    opciones = pObj.opcionesShuffled;
+  } else {
+    // Mezclar por primera vez
+    opciones = pObj.opciones.map((t, i) => ({ texto: t, originalIndex: i }));
+    shuffleArray(opciones);
 
-  // construir DOM
+    // Guardar mezcla y nueva posición correcta
+    pObj.opcionesShuffled = opciones;
+    pObj.correctIndexShuffled = opciones.findIndex(o => o.originalIndex === pObj.correcta);
+  }
+
+  const nuevaCorrecta = pObj.correctIndexShuffled;
+
+  // Construcción visual
   const qCard = document.createElement('div');
   qCard.className = 'pregunta-card';
-  qCard.innerHTML = `<div style="font-weight:700">Pregunta ${gameState.indice+1} de ${gameState.preguntas.length}</div><div style="margin-top:8px">${pObj.q}</div>`;
+  qCard.innerHTML = `
+      <div style="font-weight:700">
+          Pregunta ${pIndex + 1} de ${gameState.preguntas.length}
+      </div>
+      <div style="margin-top:8px">${pObj.q}</div>
+  `;
   area.appendChild(qCard);
 
   opciones.forEach((opt, idx) => {
@@ -4622,60 +4645,74 @@ function renderQuestion(){
     div.className = 'opcion';
     div.dataset.index = idx;
     div.innerText = opt.texto;
-    div.addEventListener('click', ()=>{
-      // si ya respondido, ignorar
-      if (gameState.responded) return;
-      gameState.responded = true;
 
-      // marcar seleccionado
+    // Recuperar si esta pregunta ya fue respondida
+    const saved = gameState.answers[pIndex];
+
+    if (saved !== null && saved !== undefined) {
+      if (idx === saved) div.classList.add('selected');
+      if (idx === nuevaCorrecta) div.classList.add('correct');
+      if (idx === saved && saved !== nuevaCorrecta) div.classList.add('incorrect');
+    }
+
+    // Evento al seleccionar
+    div.addEventListener('click', () => {
+      if (gameState.answers[pIndex] !== null) return; // ya respondida
+
+      gameState.answers[pIndex] = idx;
+
       document.querySelectorAll('.opcion').forEach(o => o.classList.remove('selected'));
       div.classList.add('selected');
 
-      // checar correcta
       if (idx === nuevaCorrecta) {
         div.classList.add('correct');
         gameState.score++;
       } else {
         div.classList.add('incorrect');
-        // marcar la correcta
         const correctEl = document.querySelector(`.opcion[data-index="${nuevaCorrecta}"]`);
         if (correctEl) correctEl.classList.add('correct');
       }
 
-      // mostrar botones prev/next adecuadamente
       updateNavButtons();
     });
+
     area.appendChild(div);
   });
 
-  // limpiar responded para esta pregunta si es nueva
-  gameState.responded = false;
-
-  // mostrar u ocultar prev/next segun indice
   updateNavButtons();
 }
-
-function updateNavButtons(){
+function updateNavButtons() {
   const prev = document.getElementById('juego-prev');
   const next = document.getElementById('juego-next');
 
-  if(!gameState) { prev.style.display = 'none'; next.style.display = 'none'; return; }
+  if (!gameState) {
+    prev.style.display = 'none';
+    next.style.display = 'none';
+    return;
+  }
 
-  // Prev visible si no estamos en la primer pregunta
-  prev.style.display = gameState.indice > 0 ? 'inline-block' : 'none';
+  const pIndex = gameState.indice;
 
-  // Next visible si respondido o si se termina (en fin mostramos Siguiente para avanzar)
-  next.style.display = gameState.responded ? 'inline-block' : 'none';
+  // Mostrar Prev si NO estamos en la primera pregunta
+  prev.style.display = pIndex > 0 ? 'inline-block' : 'none';
+
+  // Mostrar Next solo si la pregunta ya fue respondida
+  const responded = gameState.answers[pIndex] !== null && gameState.answers[pIndex] !== undefined;
+
+  next.style.display = responded ? 'inline-block' : 'none';
 }
-
 /* finalizar juego */
 function showFinal(){
   const area = document.getElementById('juego-area');
-  area.innerHTML = `<div class="pregunta-card">¡Juego terminado! Puntaje: ${gameState.score} / ${gameState.preguntas.length}</div>`;
+  area.innerHTML = `
+    <div class="pregunta-card">
+      ¡Juego terminado! Puntaje: ${gameState.score} / ${gameState.preguntas.length}
+    </div>
+  `;
+
   document.getElementById('juego-prev').style.display = 'none';
   document.getElementById('juego-next').style.display = 'none';
 }
-
 /* -------------------------
   Utilidades
 -------------------------*/

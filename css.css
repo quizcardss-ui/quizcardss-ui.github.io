@@ -203,5 +203,45 @@ body{
 .opcion.correct{ background: #dff0d8; border-color: #3aa74a; color: #1b4319; }
 .opcion.incorrect{ background: #f8d7da; border-color: #c2524b; color: #60131a; }
 
+.logo-text {
+  position: relative;
+  width: 180px;
+  margin: 0 auto 20px auto;
+  text-align: center;
+}
+
+.logo-main {
+  position: relative;
+  font-family: 'Times New Roman', serif;
+  font-size: 32px;
+  font-weight: bold;
+  color: #e5e0ff;  /* texto claro */
+  z-index: 3;
+}
+
+.big-q-left,
+.big-q-right {
+  position: absolute;
+  font-family: 'Times New Roman', serif;
+  font-size: 110px;
+  color: rgba(255,255,255,0.20);
+  font-weight: bold;
+  z-index: 1;
+}
+
+/* Posición de la Q grande */
+.big-q-left {
+  left: -15px;
+  top: -20px;
+  transform: rotate(-10deg);
+}
+
+/* Posición de la C grande */
+.big-q-right {
+  right: -10px;
+  top: -15px;
+  transform: rotate(10deg);
+}
+
 /* small helper */
 .muted{ color:var(--muted); font-weight:400; font-size:0.88rem; }

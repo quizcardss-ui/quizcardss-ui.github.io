@@ -243,5 +243,24 @@ body{
   transform: rotate(10deg);
 }
 
+/* -- TEXTOS DE LOGIN (Recuérdame + Olvidaste contraseña) -- */
+
+.checkbox,
+.checkbox label,
+label.checkbox,
+#link-olvidaste {
+  color: var(--text-dark) !important; /* blanco */
+}
+
+/* Quitar subrayado al link */
+#link-olvidaste {
+  text-decoration: none;
+}
+
+/* (Opcional) Hover bonito */
+#link-olvidaste:hover {
+  opacity: 0.8;
+}
+
 /* small helper */
 .muted{ color:var(--muted); font-weight:400; font-size:0.88rem; }

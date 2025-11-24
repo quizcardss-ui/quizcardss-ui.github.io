@@ -4416,21 +4416,46 @@ function bootListeners(){
   document.getElementById('btn-iniciar').addEventListener('click', ()=> show(screens.login));
   document.getElementById('btn-registrar').addEventListener('click', ()=> show(screens.register));
 
-  // LOGIN – validación de correo @utfv.edu.mx
+ // LOGIN – validación + verificar usuario registrado + recuérdame
 document.getElementById("form-login").addEventListener("submit", e => {
-  e.preventDefault();
+e.preventDefault();
 
-  const email = document.getElementById("login-email");
+const email = document.getElementById("login-email");
+const pass  = document.getElementById("login-password");
+const remember = document.getElementById("login-rem");
 
-  if (!email.checkValidity()) {
-    alert("El correo debe terminar en @utfv.edu.mx");
-    return;
-  }
+if (!email.checkValidity()) {
+alert("El correo debe terminar en @utfv.edu.mx");
+return;
+}
 
-  // Si es válido, avanzar
-  show(screens.cuatri);
+// Buscar usuario
+const user = DB.findUser(email.value);
+
+if(!user){
+alert("Este usuario no está registrado.");
+return;
+}
+
+if(user.password !== pass.value){
+alert("La contraseña es incorrecta.");
+return;
+}
+
+// Recuérdame (versión sencilla)
+if(remember.checked){
+localStorage.setItem("remember_password_" + email.value, user.password);
+} else {
+localStorage.removeItem("remember_password_" + email.value);
+}
+
+const saved = localStorage.getItem("remember_password_" + email.value);
+if(saved){
+document.getElementById("login-password").value = saved;
+}
+
+show(screens.cuatri);
 });
-
 // Botón volver
 document.getElementById('login-cancelar').addEventListener('click', () => {
   show(screens.inicio);
@@ -4457,6 +4482,11 @@ document.getElementById("form-register").addEventListener("submit", e => {
 
   // Si todo está bien → regresar al inicio
   alert("Registro exitoso");
+  // Guardar usuario en base de datos (DB)
+DB.saveUser({
+  email: email.value,
+  password: pass1.value
+});
   show(screens.inicio);
 });
 
@@ -4465,12 +4495,103 @@ document.getElementById('reg-cancelar').addEventListener('click', () => {
   show(screens.inicio);
 });
 
-  // Recovery
-  document.getElementById('link-olvidaste').addEventListener('click', (e)=>{ e.preventDefault(); show(screens.rec1); });
-  document.getElementById('recov-cancel').addEventListener('click', ()=> show(screens.login));
-  document.getElementById('recov-confirm').addEventListener('click', ()=> show(screens.rec2));
-  document.getElementById('recov-change').addEventListener('click', ()=> { alert('Contraseña cambiada (simulado)'); show(screens.login); });
-  document.getElementById('recov-back').addEventListener('click', ()=> show(screens.rec1));
+ // --------------------
+// RECUPERACIÓN DE CONTRASEÑA
+// --------------------
+
+// Abrir pantalla 1 (igual que el tuyo original)
+document.getElementById('link-olvidaste').addEventListener('click', (e)=>{
+  e.preventDefault();
+  document.getElementById("recov-email").value = "";
+  document.getElementById("recov-code").value = "";
+  document.getElementById("recov-code").placeholder = "*** ***";
+  show(screens.rec1);
+});
+
+// Volver a login (igual que el tuyo original)
+document.getElementById('recov-cancel').addEventListener('click', ()=>{
+  show(screens.login);
+});
+
+// -------------------------------------
+// 1) CONFIRMAR CORREO
+// -------------------------------------
+document.getElementById("recov-check-email").addEventListener("click", ()=>{
+
+  const email = document.getElementById("recov-email").value.trim();
+  const user = DB.findUser(email);
+
+  if(!user){
+    alert("Ese correo NO está registrado.");
+    document.getElementById("recov-code").value = "";
+    document.getElementById("recov-code").placeholder = "*** ***";
+    return;
+  }
+
+  // Generar código
+  const raw = Math.floor(100000 + Math.random()*900000).toString();
+  const code = raw.slice(0,3) + " " + raw.slice(3);
+
+  localStorage.setItem("recovery_code", code);
+  localStorage.setItem("recovery_email", email);
+
+  document.getElementById("recov-code").value = code;
+
+  alert("Correo confirmado. Código creado.");
+});
+
+// -------------------------------------
+// 2) CONFIRMAR CÓDIGO  (tu pantalla 1 → pantalla 2)
+// -------------------------------------
+document.getElementById('recov-confirm').addEventListener('click', ()=>{
+  const entered = document.getElementById("recov-code").value.trim();
+  const saved = localStorage.getItem("recovery_code");
+
+  if(!saved){
+    alert("Primero debes confirmar tu correo.");
+    return;
+  }
+
+  if(entered !== saved){
+    alert("Código incorrecto.");
+    return;
+  }
+
+  show(screens.rec2);  // ✔ EXACTAMENTE IGUAL QUE TENÍAS
+});
+
+// -------------------------------------
+// 3) CAMBIAR CONTRASEÑA
+// -------------------------------------
+document.getElementById('recov-change').addEventListener('click', ()=>{
+
+  const pass1 = document.getElementById("recov-new").value.trim();
+  const pass2 = document.getElementById("recov-new2").value.trim();
+  const email = localStorage.getItem("recovery_email");
+
+  if(pass1.length < 1){
+    alert("Escribe una contraseña.");
+    return;
+  }
+
+  if(pass1 !== pass2){
+    alert("Las contraseñas no coinciden.");
+    return;
+  }
+
+  DB.updatePassword(email, pass1);
+
+  localStorage.removeItem("recovery_code");
+  localStorage.removeItem("recovery_email");
+
+  alert("Contraseña cambiada correctamente.");
+  show(screens.login); // igual que el tuyo original
+});
+
+// Volver de paso 2 a paso 1
+document.getElementById('recov-back').addEventListener('click', ()=>{
+  show(screens.rec1);
+});
 
   // Cuatrimestres
   document.querySelectorAll('.cuatri').forEach(btn=>{

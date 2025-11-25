@@ -1,29 +1,40 @@
+// Base de datos con LocalStorage
+const DB = {
+  users: [],
 
-const express = require('express');
-const app = express();
-const mysql = require('mysql2');
-const cors = require('cors');
+  // Carga usuarios guardados previamente
+  loadUsers(){
+    const data = localStorage.getItem("quiz_users");
+    if(data){
+      this.users = JSON.parse(data);
+    }
+  },
 
-app.use(cors());
-app.use(express.json());
+  // Guarda todos los usuarios en LocalStorage
+  saveAll(){
+    localStorage.setItem("quiz_users", JSON.stringify(this.users));
+  },
 
-// Conexión a MySQL
-const conn = mysql.createConnection({
-    host: 'localhost',
-    user: 'root',
-    password: '',
-    database: 'quizcards'
-});
+  // Guarda un usuario nuevo
+  saveUser(user){
+    this.users.push(user);
+    this.saveAll();
+  },
 
-// Endpoint de prueba
-app.get('/api/cuatrimestres', (req,res)=>{
-    conn.query("SELECT * FROM cuatrimestres", (err,data)=>{
-        if(err){
-            return res.status(500).json({error: err});
-        }
-        res.json(data);
-    });
-});
+  // Busca usuario por correo
+  findUser(email){
+    return this.users.find(u => u.email === email);
+  },
 
-// Servidor
-app.listen(3000, ()=> console.log("API corriendo en el puerto 3000"));
+  // Actualiza contraseña de un usuario
+  updatePassword(email, newPass){
+    const user = this.findUser(email);
+    if(user){
+      user.password = newPass;
+      this.saveAll();
+    }
+  }
+};
+
+// Cargar usuarios al iniciar el proyecto
+DB.loadUsers();
